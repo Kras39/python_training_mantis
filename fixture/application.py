@@ -1,21 +1,21 @@
 from selenium import webdriver
 from fixture.session import SessionHelper
-
+from fixture.project import ProjectHelper
 
 class Application:
 
     def __init__(self, browser, base_url):
         if browser == "firefox":
             self.wd = webdriver.Firefox()
-        elif browser == "chrome":
+        elif browser == "Chrome":
             self.wd = webdriver.Chrome()
         elif browser == "ie":
             self.wd = webdriver.Ie()
-        elif browser == "opera":
-            self.wd = webdriver.Opera()
         else:
-            raise ValueError("Unrecognized browser %s" % browser)
+            raise ValueError("Unrecoznized browse %s" % browser)
+        self.wd.implicitly_wait(5)
         self.session = SessionHelper(self)
+        self.project = ProjectHelper(self)
         self.base_url = base_url
 
     def is_valid(self):
@@ -31,3 +31,12 @@ class Application:
 
     def destroy(self):
         self.wd.quit()
+
+    def get_serial_number_element_by_id(self, list_elements, id):
+        i = 0
+        for index_element in list_elements:
+            if index_element.id == id:
+                break
+            else:
+                i = i + 1
+        return i

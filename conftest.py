@@ -1,6 +1,8 @@
 import json
 import pytest
 import os.path
+import importlib
+import jsonpickle
 from fixture.application import Application
 
 fixture = None
@@ -14,37 +16,19 @@ def load_config(file):
             target = json.load(f)
     return target
 
-def pytest_addoption(parser):
-    parser.addoption("--browser", action="store", default="firefox")
-    parser.addoption("--target", action="store", default="target.json")
-    parser.addoption("--check_ui", action="store_true")
+@pytest.fixture(scope="session")
+def config(request):
+    return load_config(request.config.getoption("--target"))
+
 
 @pytest.fixture
-def app(request):
+def app(request, config):
     global fixture
-    global target
     browser = request.config.getoption("--browser")
-    web_config = load_config(request.config.getoption("--target"))['web']
     if fixture is None or not fixture.is_valid():
-        fixture = Application(browser=browser,base_url=web_config['baseUrl'])
+        fixture = Application(browser=browser, base_url=config['web']['baseUrl'])
+    fixture.session.ensure_authorization(config['web']['username'], config['web']['password'])
     return fixture
-
-@pytest.fixture(scope="session")
-def db(request):
-    db_config = load_config(request.config.getoption("--target"))['db']
-    dbfixture = DbFixture(host=db_config['host'], name=db_config['name'], user=db_config['user'], password=db_config['password'])
-    def fin():
-        dbfixture.destroy()
-    request.addfinalizer(fin)
-    return dbfixture
-
-@pytest.fixture(scope="session")
-def orm(request):
-    orm_config = load_config(request.config.getoption("--target"))['db']
-    orm_fixture = ORMFixture(host=orm_config['host'], name=orm_config['name'],
-                            user=orm_config['user'], password=orm_config['password'])
-    return orm_fixture
-
 
 @pytest.fixture(scope="session", autouse=True)
 def stop(request):
@@ -54,9 +38,10 @@ def stop(request):
     request.addfinalizer(fin)
     return fixture
 
-@pytest.fixture
-def check_ui(request):
-    return request.config.getoption("--check_ui")
+
+def pytest_addoption(parser):
+    parser.addoption("--browser", action="store", default="firefox")
+    parser.addoption("--target", action="store", default="target.json")
 
 
 def pytest_generate_tests(metafunc):
