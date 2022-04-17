@@ -1,8 +1,8 @@
-import json
-import pytest
-import os.path
 import importlib
 import jsonpickle
+import pytest
+import json
+import os.path
 import ftputil
 from fixture.application import Application
 
