@@ -8,7 +8,7 @@ def test_del_project(app):
     # old_projects = app.project.get_project_list()
     old_projects = app.soap.get_list_mantis_projects()
     project = random.choice(old_projects)
-    project_name = project.name
+    # project_name = project.name
     app.project.delete_contact_by_name(project.name)
     # new_projects = app.project.get_project_list()
     new_projects = app.soap.get_list_mantis_projects()
