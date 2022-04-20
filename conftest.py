@@ -30,7 +30,7 @@ def app(request, config):
     web_config = load_config(request.config.getoption("--target"))
     if fixture is None or not fixture.is_valid():
         fixture = Application(browser=browser, config=config)
-    # fixture.session.ensure_login(config['web']['username'], config['web']['password'])
+    fixture.session.ensure_login(config['web']['username'], config['web']['password'])
     return fixture
 
 @pytest.fixture(scope="session", autouse=True)
